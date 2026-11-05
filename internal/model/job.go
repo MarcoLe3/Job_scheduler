@@ -36,6 +36,8 @@ type Job struct {
 	Attempts       int
 	MaxAttempts    int
 	RunAt          time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 func NewJob(req JobRequest) *Job {

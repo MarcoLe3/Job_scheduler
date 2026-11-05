@@ -4,15 +4,22 @@ import (
 	"context"
 
 	"scheduler/internal/cache"
-	"scheduler/internal/db"
 	"scheduler/internal/model"
+	"scheduler/internal/repo"
 )
 
 type Service struct {
-	queue      *BlockingQueue[*model.Job]
-	db         db.DB
-	cache      *cache.Cache
-	workerPool *WorkerPool
+	queue *BlockingQueue[*model.Job]
+	repo  repo.Repository
+	cache *cache.Cache
+}
+
+func NewService(r repo.Repository, c *cache.Cache, q *BlockingQueue[*model.Job]) *Service {
+	return &Service{
+		queue: q,
+		repo:  r,
+		cache: c,
+	}
 }
 
 func (s *Service) Submit(ctx context.Context, req model.JobRequest) (*model.Job, error) {

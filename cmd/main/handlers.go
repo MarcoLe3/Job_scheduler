@@ -6,10 +6,17 @@ import (
 	"net/http"
 
 	"scheduler/internal/db"
+	"scheduler/internal/model"
 )
 
 type Handler struct {
 	service *Service
+}
+
+func NewHandler(s *Service) *Handler {
+	return &Handler{
+		service: s,
+	}
 }
 
 func (h *Handler) routes() http.Handler {
@@ -21,7 +28,7 @@ func (h *Handler) routes() http.Handler {
 }
 
 func (h *Handler) submit(w http.ResponseWriter, r *http.Request) {
-	var req job.JobRequest
+	var req model.JobRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
