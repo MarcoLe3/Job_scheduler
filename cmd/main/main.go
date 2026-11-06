@@ -59,6 +59,11 @@ func main() {
 	pool.Start(ctx, 8)
 	app := NewHandler(svc)
 	srv := &http.Server{Addr: ":4000", Handler: app.routes()}
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			log.Fatalf("http: %v", err)
+		}
+	}()
 
 	log.Println("Listening on port :4000")
 

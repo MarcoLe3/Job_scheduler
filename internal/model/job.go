@@ -27,17 +27,18 @@ type JobRequest struct {
 }
 
 type Job struct {
-	ID             string
-	IdempotencyKey string
-	Type           string
-	Payload        json.RawMessage
-	Status         Status
-	Priority       int
-	Attempts       int
-	MaxAttempts    int
-	RunAt          time.Time
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID             string          `json:"id"`
+	IdempotencyKey string          `json:"idempotency_key,omitempty"`
+	Type           string          `json:"type"`
+	Payload        json.RawMessage `json:"payload"`
+	Status         Status          `json:"status"`
+	Priority       int             `json:"priority"`
+	Attempts       int             `json:"attempts"`
+	MaxAttempts    int             `json:"max_attempts"`
+	LastError      string          `json:"last_error,omitempty"`
+	RunAt          time.Time       `json:"run_at"`
+	CreatedAt      time.Time       `json:"created_at"`
+	UpdatedAt      time.Time       `json:"updated_at"`
 }
 
 func NewJob(req JobRequest) *Job {
