@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"errors"
+	"time"
 
 	"scheduler/internal/model"
 
@@ -51,22 +52,27 @@ func (r *PostgresRepo) Get(ctx context.Context, id string) (*model.Job, error) {
 	return job, nil
 }
 
-func (r *PostgresRepo) MarkDone(ctx context.Context, id string) error {
+func (r *PostgresRepo) MarkDone(ctx context.Context, id string, updTime time.Time) error {
 	_, err := r.DB.Exec(ctx, `UPDATE jobs SET status = 'done' WHERE id = $1`, id)
 	return err
 }
 
-func (r *PostgresRepo) MarkDead(ctx context.Context, id string) error {
+func (r *PostgresRepo) MarkDead(ctx context.Context, id string, errMsg string, updTime time.Time) error {
 	_, err := r.DB.Exec(ctx, `UPDATE jobs SET status = 'dead' WHERE id = $1`, id)
 	return err
 }
 
-func (r *PostgresRepo) MarkFailed(ctx context.Context, id string) error {
+func (r *PostgresRepo) MarkFailed(ctx context.Context, id string, errMsg string, updTime time.Time) error {
 	_, err := r.DB.Exec(ctx, `UPDATE jobs SET status = 'done' WHERE id = $1`, id)
 	return err
 }
 
-func (r *PostgresRepo) MarkRunning(ctx context.Context, id string) error {
+func (r *PostgresRepo) MarkRunning(ctx context.Context, id string, updTime time.Time) error {
 	_, err := r.DB.Exec(ctx, `UPDATE jobs SET status = 'running' WHERE id = $1`, id)
+	return err
+}
+
+func (r *PostgresRepo) Requeue(ctx context.Context, id string, errMsg string, t time.Duration, updTime time.Time) error {
+	_, err := r.DB.Exec(ctx, `UPDATE jobs SET status = 'running', attempts = attempts + 1, last_error = '' WHERE id = $1`, id)
 	return err
 }

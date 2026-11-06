@@ -65,6 +65,22 @@ func main() {
 		}
 	}()
 
+	go func() {
+		t := time.NewTicker(time.Second * 2)
+		defer t.Stop()
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			snap := queue.Snapshot()
+			log.Printf("queue %p len=%d", queue, len(snap))
+			for _, j := range snap {
+				log.Printf("  waiting: id=%s type=%s status=%s", j.ID, j.Type, j.Status)
+			}
+		}
+	}()
+
 	log.Println("Listening on port :4000")
 
 	<-ctx.Done()
