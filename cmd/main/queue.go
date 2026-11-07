@@ -40,14 +40,21 @@ func (q *BlockingQueue[T]) Enqueue(ctx context.Context, item T) error {
 	}
 
 	for len(q.items) == q.capacity {
+		if q.closed {
+			return ErrClosed
+		}
 		if err := ctx.Err(); err != nil {
 			return err
 		}
 		q.notFull.Wait()
 	}
 
+	if q.closed {
+		return ErrClosed
+	}
+
 	q.items = append(q.items, item)
-	q.notFull.Signal()
+	q.notEmpty.Broadcast()
 	return nil
 }
 
@@ -70,8 +77,9 @@ func (q *BlockingQueue[T]) Dequeue(ctx context.Context) (T, error) {
 	}
 
 	item := q.items[0]
+	q.items[0] = zero
 	q.items = q.items[1:]
-	q.notEmpty.Signal()
+	q.notFull.Broadcast()
 	return item, nil
 }
 

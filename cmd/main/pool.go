@@ -86,8 +86,6 @@ func (p *WorkerPool) execute(ctx context.Context, job *model.Job) {
 		log.Printf("job %s dead after %d attempts: %v", job.ID, job.Attempts, err)
 		p.repo.MarkDead(dbCtx, job.ID, err.Error(), time.Now().UTC())
 	}
-	job.UpdatedAt = time.Now().UTC()
-
 }
 
 func (p *WorkerPool) run(ctx context.Context, job *model.Job) error {

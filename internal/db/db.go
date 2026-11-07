@@ -3,13 +3,34 @@ package db
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func DSN() (string, error) {
+type DSNConfig struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Dbname   string
+}
+
+func (d DSNConfig) DSN() string {
+	u := url.URL{
+		Scheme:   "postgres",
+		User:     url.UserPassword(d.User, d.Password),
+		Host:     net.JoinHostPort(d.Host, d.Port),
+		Path:     d.Dbname,
+		RawQuery: "sslmode=disable",
+	}
+	return u.String()
+}
+
+func DSNConfigFromEnv() (DSNConfig, error) {
 	host := os.Getenv("POSTGRES_HOST")
 	port := os.Getenv("POSTGRES_PORT")
 	user := os.Getenv("POSTGRES_USER")
@@ -17,11 +38,18 @@ func DSN() (string, error) {
 	dbname := os.Getenv("POSTGRES_DB")
 
 	if host == "" || port == "" || user == "" || password == "" || dbname == "" {
-		return "", fmt.Errorf("database connection details are not fully set")
+		return DSNConfig{}, fmt.Errorf("database connection details are not fully set")
 	}
 
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		user, password, host, port, dbname), nil
+	c := DSNConfig{
+		Host:     host,
+		Port:     port,
+		User:     user,
+		Password: password,
+		Dbname:   dbname,
+	}
+
+	return c, nil
 }
 
 func OpenDB(ctx context.Context, dsn string) (*pgxpool.Pool, error) {

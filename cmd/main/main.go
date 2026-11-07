@@ -26,12 +26,12 @@ func main() {
 		log.Println("no .env loaded or found")
 	}
 
-	dsn, err := db.DSN()
+	cfg, err := db.DSNConfigFromEnv()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db, err := db.OpenDB(ctx, dsn)
+	db, err := db.OpenDB(ctx, cfg.DSN())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,25 +59,10 @@ func main() {
 	pool.Start(ctx, 8)
 	app := NewHandler(svc)
 	srv := &http.Server{Addr: ":4000", Handler: app.routes()}
+
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			log.Fatalf("http: %v", err)
-		}
-	}()
-
-	go func() {
-		t := time.NewTicker(time.Second * 2)
-		defer t.Stop()
-
-		select {
-		case <-ctx.Done():
-			return
-		case <-t.C:
-			snap := queue.Snapshot()
-			log.Printf("queue %p len=%d", queue, len(snap))
-			for _, j := range snap {
-				log.Printf("  waiting: id=%s type=%s status=%s", j.ID, j.Type, j.Status)
-			}
+			log.Fatalf("%v", err)
 		}
 	}()
 

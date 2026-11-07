@@ -63,16 +63,16 @@ func (r *PostgresRepo) MarkDead(ctx context.Context, id string, errMsg string, u
 }
 
 func (r *PostgresRepo) MarkFailed(ctx context.Context, id string, errMsg string, updTime time.Time) error {
-	_, err := r.DB.Exec(ctx, `UPDATE jobs SET status = 'done' WHERE id = $1`, id)
+	_, err := r.DB.Exec(ctx, `UPDATE jobs SET status = 'done', updated_at = $1, last_error = $2 WHERE id = $3`, updTime, errMsg, id)
 	return err
 }
 
 func (r *PostgresRepo) MarkRunning(ctx context.Context, id string, updTime time.Time) error {
-	_, err := r.DB.Exec(ctx, `UPDATE jobs SET status = 'running' WHERE id = $1`, id)
+	_, err := r.DB.Exec(ctx, `UPDATE jobs SET status = 'running', updated_at = $1 WHERE id = $2`, updTime, id)
 	return err
 }
 
 func (r *PostgresRepo) Requeue(ctx context.Context, id string, errMsg string, t time.Duration, updTime time.Time) error {
-	_, err := r.DB.Exec(ctx, `UPDATE jobs SET status = 'running', attempts = attempts + 1, last_error = '' WHERE id = $1`, id)
+	_, err := r.DB.Exec(ctx, `UPDATE jobs SET status = 'running', attempts = attempts + 1, updated_at = $1, last_error = $2 WHERE id = $3`, updTime, errMsg, id)
 	return err
 }
