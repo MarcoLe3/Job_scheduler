@@ -1,14 +1,16 @@
-package main
+package queue_test
 
 import (
 	"context"
 	"sync"
 	"testing"
 	"time"
+
+	"scheduler/cmd/main/queue"
 )
 
 func TestDequeBlockingUntilEnqueue(t *testing.T) {
-	q := NewBlockingQueue[int](2)
+	q := queue.NewBlockingQueue[int](2)
 	got := make(chan int, 1)
 
 	go func() {
@@ -30,7 +32,7 @@ func TestDequeBlockingUntilEnqueue(t *testing.T) {
 }
 
 func TestEnqueueBlockingUntilDequeue(t *testing.T) {
-	q := NewBlockingQueue[int](1)
+	q := queue.NewBlockingQueue[int](1)
 
 	if err := q.Enqueue(context.Background(), 67); err != nil {
 		t.Fatal(err)
@@ -63,7 +65,7 @@ func TestEnqueueBlockingUntilDequeue(t *testing.T) {
 }
 
 func TestQueueConcurrent(t *testing.T) {
-	q := NewBlockingQueue[int](8)
+	q := queue.NewBlockingQueue[int](8)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

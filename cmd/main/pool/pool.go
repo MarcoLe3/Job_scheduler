@@ -1,4 +1,4 @@
-package main
+package pool
 
 import (
 	"context"
@@ -7,26 +7,28 @@ import (
 	"sync"
 	"time"
 
+	"scheduler/cmd/main/queue"
+	"scheduler/cmd/main/request"
 	"scheduler/internal/model"
 	"scheduler/internal/repo"
 )
 
 type WorkerPool struct {
-	queue    *BlockingQueue[*model.Job]
-	handlers map[string]Request
+	queue    *queue.BlockingQueue[*model.Job]
+	handlers map[string]request.Request
 	repo     repo.Repository
 	wg       sync.WaitGroup
 }
 
-func NewWorkerPool(q *BlockingQueue[*model.Job], r repo.Repository) *WorkerPool {
+func NewWorkerPool(q *queue.BlockingQueue[*model.Job], r repo.Repository) *WorkerPool {
 	return &WorkerPool{
 		queue:    q,
-		handlers: make(map[string]Request),
+		handlers: make(map[string]request.Request),
 		repo:     r,
 	}
 }
 
-func (p *WorkerPool) AddRequest(jobType string, r Request) {
+func (p *WorkerPool) AddRequest(jobType string, r request.Request) {
 	p.handlers[jobType] = r
 }
 

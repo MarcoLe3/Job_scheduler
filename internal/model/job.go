@@ -10,12 +10,12 @@ import (
 type Status string
 
 const (
-	StatusQueued    Status = "queued"
-	StatusRunning   Status = "running"
-	StatusCompleted Status = "completed"
-	StatusFailed    Status = "failed"
-	StatusRejected  Status = "rejected"
-	StatusDead      Status = "dead"
+	StatusQueued   Status = "queued"
+	StatusRunning  Status = "running"
+	StatusDone     Status = "done"
+	StatusFailed   Status = "failed"
+	StatusRejected Status = "rejected"
+	StatusDead     Status = "dead"
 )
 
 type JobRequest struct {

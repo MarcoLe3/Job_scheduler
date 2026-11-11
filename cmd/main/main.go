@@ -55,6 +55,7 @@ func main() {
 	pool := NewWorkerPool(queue, pgRepo)
 	pool.AddRequest("echo", EchoRequest)
 	pool.AddRequest("stripe", StripeRequest)
+	pool.AddRequest("flaky", FlakyRequest)
 
 	pool.Start(ctx, 8)
 	app := NewHandler(svc)

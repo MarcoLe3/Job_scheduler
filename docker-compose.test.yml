@@ -6,5 +6,5 @@ services:
       - POSTGRES_PASSWORD=test
       - POSTGRES_DB=test
     ports:
-      - "5342:5342"
+      - "5432:5432"
     
