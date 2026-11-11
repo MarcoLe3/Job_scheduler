@@ -35,6 +35,8 @@ func (s *Service) Submit(ctx context.Context, req model.JobRequest) (*model.Job,
 	if err != nil {
 		return nil, err
 	}
+
+	err = s.cache.Set()
 	return job, nil
 }
 

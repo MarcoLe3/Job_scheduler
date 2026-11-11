@@ -115,6 +115,9 @@ func (p *WorkerPool) safeRun(ctx context.Context, job *model.Job) (err error) {
 
 func (p *WorkerPool) backoff(attempt int) time.Duration {
 	d := time.Duration(1<<attempt) * time.Second
+	if d > 5*time.Minute {
+		d = 5 * time.Minute
+	}
 	d = d/2 + time.Duration(rand.Int63n(int64(d/2)))
 	return d
 }
