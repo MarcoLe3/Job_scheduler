@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -76,7 +77,8 @@ func (p *WorkerPool) execute(ctx context.Context, job *model.Job) {
 			log.Printf("job %s: Mark Done failed: %v", job.ID, e)
 		}
 	case job.Attempts < job.MaxAttempts:
-		delay := time.Duration(1<<job.Attempts) * time.Second
+		delay := p.backoff(job.Attempts)
+
 		log.Printf("job %s failed (attempt %d), retrying in %v: %v", job.ID, job.Attempts, delay, err)
 		if e := p.repo.Requeue(dbCtx, job.ID, err.Error(), delay, time.Now().UTC()); e != nil {
 			log.Printf("job %s: Requeue failed: %v", job.ID, e)
@@ -109,4 +111,10 @@ func (p *WorkerPool) safeRun(ctx context.Context, job *model.Job) (err error) {
 		}
 	}()
 	return p.run(ctx, job)
+}
+
+func (p *WorkerPool) backoff(attempt int) time.Duration {
+	d := time.Duration(1<<attempt) * time.Second
+	d = d/2 + time.Duration(rand.Int63n(int64(d/2)))
+	return d
 }

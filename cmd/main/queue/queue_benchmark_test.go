@@ -23,7 +23,9 @@ func BenchmarkQueue(b *testing.B) {
 	ctx := context.Background()
 	go func() {
 		for {
-			q.Dequeue(ctx)
+			if _, err := q.Dequeue(ctx); err != nil {
+				return
+			}
 		}
 	}()
 	for b.Loop() {

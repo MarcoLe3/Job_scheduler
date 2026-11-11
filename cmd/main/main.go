@@ -12,6 +12,10 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 
+	"scheduler/cmd/main/queue"
+	"scheduler/cmd/main/request"
+	"scheduler/cmd/main/pool"
+
 	"scheduler/internal/cache"
 	"scheduler/internal/db"
 	"scheduler/internal/model"
@@ -49,13 +53,13 @@ func main() {
 	defer rdb.Close()
 
 	cache := cache.NewCache(rdb, time.Hour*2)
-	queue := NewBlockingQueue[*model.Job](1000)
-	svc := NewService(pgRepo, cache, queue)
+	q := queue.NewBlockingQueue[*model.Job](1000)
+	svc := NewService(pgRepo, cache, q)
 
-	pool := NewWorkerPool(queue, pgRepo)
-	pool.AddRequest("echo", EchoRequest)
-	pool.AddRequest("stripe", StripeRequest)
-	pool.AddRequest("flaky", FlakyRequest)
+	pool := pool.NewWorkerPool(q, pgRepo)
+	pool.AddRequest("echo", request.EchoRequest)
+	pool.AddRequest("stripe", request.StripeRequest)
+	pool.AddRequest("flaky", request.FlakyRequest)
 
 	pool.Start(ctx, 8)
 	app := NewHandler(svc)

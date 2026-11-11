@@ -5,18 +5,19 @@ import (
 	"log"
 	"time"
 
+	"scheduler/cmd/main/queue"
 	"scheduler/internal/cache"
 	"scheduler/internal/model"
 	"scheduler/internal/repo"
 )
 
 type Service struct {
-	queue *BlockingQueue[*model.Job]
+	queue *queue.BlockingQueue[*model.Job]
 	repo  repo.Repository
 	cache *cache.Cache
 }
 
-func NewService(r repo.Repository, c *cache.Cache, q *BlockingQueue[*model.Job]) *Service {
+func NewService(r repo.Repository, c *cache.Cache, q *queue.BlockingQueue[*model.Job]) *Service {
 	return &Service{
 		queue: q,
 		repo:  r,
